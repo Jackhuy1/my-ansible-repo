@@ -1,0 +1,40 @@
+- name: Setup MySQL Server in Debian 12
+  hosts: myhosts
+  become: yes
+  become_method: sudo
+  tasks:
+  - name: Add the mysql_native_password=On to mysqld.cnf file
+    ansible.builtin.blockinfile:
+        path: /etc/mysql/mysql.conf.d/mysqld.cnf
+        append_newline: true
+        prepend_newline: true
+        block: |
+          mysql_native_password=ON
+  - name: Restart MySQL Server service
+    ansible.builtin.service:
+        name: mysql
+        state: restarted
+  - name: creating mysql user
+    community.mysql.mysql_user:
+        login_unix_socket: /run/mysqld/mysqld.sock
+        name: "maytinh"
+        password: "Tdc@12345"
+        priv: '*.*:ALL'
+        host: '%'
+        state: present
+  - name: creating medium_db
+    community.mysql.mysql_db:
+        login_unix_socket: /run/mysqld/mysqld.sock
+        name: "maytinh"
+        state: present
+  - name: Collect all possible information using passwordless root access
+    community.mysql.mysql_info:
+      login_user: root
+      login_unix_socket: /run/mysqld/mysqld.sock
+#  - name: Restore database
+#    community.mysql.mysql_db:
+#      name: maytinh
+#      state: import
+#      target: /home/$USER/maytinh/database/computer_store.sql
+#      login_user: root
+#      login_unix_socket: /run/mysqld/mysqld.sock

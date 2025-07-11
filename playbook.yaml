@@ -1,0 +1,108 @@
+- name: My first play
+  hosts: myhosts
+  tasks:
+   - name: Ping my hosts
+     ansible.builtin.ping:
+
+   - name: Print message
+     ansible.builtin.debug:
+       msg: Hello world
+
+   - name: Update and upgrade apt packages
+     become: true
+     become_method: sudo
+     apt:
+      upgrade: yes
+      update_cache: yes
+      cache_valid_time: 86400 #One day
+      autoremove: true
+      autoclean: true
+   - name: Install some package for Ansible
+     become: true
+     become_method: sudo
+     ansible.builtin.apt:
+      name: python3-pymysql, python3-pip
+      state: present
+      install_recommends: true
+   - name: Install Apache2 Web Server
+     become: true
+     become_method: sudo
+     ansible.builtin.apt:
+      name: apache2
+      state: present
+      install_recommends: true
+   - name: Ensure Apache2 is at the latest version
+     ansible.builtin.apt:
+      name: apache2
+      state: latest
+   - name: Ensure that Apache2 is started
+     ansible.builtin.service:
+      name: apache2
+      state: started
+   - name: Delete the default index.html
+     become: true
+     ansible.builtin.file:
+      path: /var/www/html/index.html
+      state: absent
+   - name: Get the MySQL Repository Information
+     ansible.builtin.get_url:
+      url: https://dev.mysql.com/get/mysql-apt-config_0.8.30-1_all.deb
+      dest: /tmp
+      headers:
+        user-agent: curl/7.81.0
+   - name: Install MySQL Repo
+     become: true
+     become_method: sudo
+     ansible.builtin.apt:
+      deb: /tmp/mysql-apt-config_0.8.30-1_all.deb
+   - name: Update the MySQL Repo
+     become: true
+     become_method: sudo
+     apt:
+      update_cache: yes
+   - name: Install MySQL Server
+     become: true
+     become_method: sudo
+     ansible.builtin.apt:
+      name: mysql-server, mysql-client
+      install_recommends: true
+      state: present
+   - name: Ensure MySQL Server is at the latest version
+     ansible.builtin.apt:
+      name: mysql-server
+      state: latest
+   - name: Ensure that MySQL Server is started
+     ansible.builtin.service:
+      name: mysql
+      state: started
+   - name: Install PHP and MySQL PHP
+     become: true
+     become_method: sudo
+     ansible.builtin.apt:
+      name: php,php-mysql
+      state: present
+      install_recommends: true
+   - name: Install Git Package
+     become: true
+     become_method: sudo
+     ansible.builtin.apt:
+      name: git
+      state: present
+      install_recommends: true
+   - name: Clone a Web Repo maytinh
+     become: true
+     become_method: sudo
+     ansible.builtin.git:
+      repo: 'https://github.com/Jackhuy1/web-maytinh.git'
+      clone: true
+      dest: /home/$USER/maytinh
+      version: main
+   - name: Move Source Web to www folder
+     become: true
+     become_method: sudo
+     ansible.builtin.copy:
+      src: /home/$USER/maytinh/
+      dest: /var/www/html/
+      owner: root
+      group: root
+      remote_src: yes
